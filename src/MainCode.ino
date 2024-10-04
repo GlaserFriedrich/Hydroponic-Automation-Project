@@ -1,3 +1,8 @@
+#include <SD.h>
+#include <SPI.h>
+File datalog;
+int pinCS = 53;
+
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -21,17 +26,15 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 const int LEDpin = 10;
-
 const int fan_control_pin = 3;
-
 const int LDRpin = A0;
-
 
 float watertemp;
 int LDRvalue;
 float humidity;
 float airtemp;
 bool LEDan;
+bool fanhigh;
 
 
 void setup() {
@@ -41,7 +44,32 @@ void setup() {
   lcd.init();
   lcd.backlight();
   lcd.print("Startup....");
+  delay(1000);
+  lcd.clear();
 
+  pinMode(pinCS, OUTPUT);
+  if (SD.begin()) {
+      Serial.println("SD card is ready to use.");
+      lcd.print("SD card is ready to use.");
+      delay(1000);
+      lcd.clear();
+    } 
+
+    else {
+      Serial.println("SD card initialization failed");
+      lcd.print("SD card initialization failed");
+      delay(1000);
+      lcd.clear();
+      return;
+    }
+  datalog = SD.open("datalog.txt", FILE_WRITE);
+  if (datalog) {
+    Serial.println("Datalog file created");
+  }
+  else {
+    Serial.println("Error creating datalog file");
+  }
+  datalog.close();
   dht.begin();
 
   timer16h.setTimeout(57600000);
@@ -58,6 +86,8 @@ void setup() {
   pinMode(fan_control_pin, OUTPUT);
   //analogWrite(fan_control_pin,200);
   
+  lcd.print(".Startup complete.");
+  delay(1000);
   lcd.clear();
 
   timer8h.restart();
@@ -123,8 +153,9 @@ void loop() {
       LED_Check();
 
     }
-
-
+    
+    Datalog();
+    
   }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (timer15min.onExpired()) {
@@ -132,6 +163,7 @@ void loop() {
     timer2h.restart();
     analogWrite(fan_control_pin,20);
     Serial.println(".Fan LOW.");
+    fanhigh = false;
     //Ventilator an
 
   }
@@ -141,6 +173,7 @@ void loop() {
     timer15min.restart();
     analogWrite(fan_control_pin,100);
     Serial.println(".Fan HIGH.");
+    fanhigh = true;
     //Ventilatoraus
 
   }
@@ -214,5 +247,42 @@ void Humidity_Check () {
   lcd.print(" H ");
   int h = round(humidity);
   lcd.print(h);
+
+}
+
+void Datalog () {
+    
+    Serial.println("Writing to Datalog...");
+    datalog= SD.open("datalog.txt",FILE_WRITE);
+    datalog.print("Watertemp: ");
+    datalog.print(watertemp);
+    datalog.print(" Airtemp: ");
+    datalog.print(airtemp);
+    datalog.print(" Humidity: ");
+    datalog.print(humidity);
+    datalog.print("% FAN: ");
+    datalog.print(fanhigh);
+    
+    if (timer16h.isActive()) {
+    
+    datalog.print(" Day Cycle: ");
+    datalog.print(timer16h.getPercentValue());
+    datalog.print("%");
+
+    }
+
+    if (timer8h.isActive()) {
+    
+    datalog.print(" Night Cycle: ");
+    datalog.print(timer8h.getPercentValue());
+    datalog.print("%");
+
+    }
+
+    if ((LEDan == true) && (LDRvalue >= 500))  {    //LEDAN?
+
+      datalog.println(" LEDs OK");
+
+    }
 
 }
