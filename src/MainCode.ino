@@ -86,7 +86,7 @@ void setup() {
   pinMode(fan_control_pin, OUTPUT);
   //analogWrite(fan_control_pin,200);
   
-  lcd.print(".Startup complete.");
+  lcd.print("....Startup complete");
   delay(1000);
   lcd.clear();
 
@@ -103,7 +103,7 @@ void loop() {
     timer8h.restart();
     digitalWrite(LEDpin,LOW);
     LEDan = false;
-    Serial.println(".LED lights OFF.");
+    Serial.println("...LED lights OFF...");
     //LED ausschalten
 
   }
@@ -113,7 +113,7 @@ void loop() {
     timer16h.restart();
     digitalWrite(LEDpin,HIGH);
     LEDan = true;
-    Serial.println(".LED lights ON.");
+    Serial.println("...LED lights ON...");
     //LEDanschalten
 
   }
@@ -162,8 +162,8 @@ void loop() {
     
     timer2h.restart();
     analogWrite(fan_control_pin,20);
-    Serial.println(".Fan LOW.");
-    fanhigh = false;
+    Serial.println("...Fan LOW...");
+    fanhigh = true;
     //Ventilator an
 
   }
@@ -172,8 +172,8 @@ void loop() {
     
     timer15min.restart();
     analogWrite(fan_control_pin,100);
-    Serial.println(".Fan HIGH.");
-    fanhigh = true;
+    Serial.println("...Fan HIGH...");
+    fanhigh = false;
     //Ventilatoraus
 
   }
@@ -187,12 +187,12 @@ void LED_Check () {
 
   if (LDRvalue >= 500) {
 
-    Serial.println(".LED lights are working.");
+    Serial.println("...LED lights are working...");
 
   }
   else if (LDRvalue < 500) {
 
-    Serial.println(".WARNING! LED lights might be defective.");
+    Serial.println("...WARNING! LED lights might be defective...");
 
   }
 
@@ -203,9 +203,9 @@ void Watertemp_Check () {
 
   sensors.requestTemperatures(); 
   watertemp = sensors.getTempCByIndex(0);
-  Serial.print(".Water temperature in °C: ");
+  Serial.print("...Water temperature in °C: ");
   Serial.print(watertemp);
-  Serial.println(".");
+  Serial.println("...");
   lcd.print("WT ");
   int w = round(watertemp);
   lcd.print(w);
@@ -218,13 +218,13 @@ void Airtemp_Check () {
   airtemp = dht.readTemperature();
   if (isnan(airtemp)) {
 
-      Serial.println(F(".Failed to read from DHT sensor!."));
+      Serial.println(F("...Failed to read from DHT sensor!..."));
       return;
 
   }
-  Serial.print(".Air Temperature in °C: ");
+  Serial.print("...Air Temperature in °C: ");
   Serial.print(airtemp);
-  Serial.println(".");
+  Serial.println("...");
   lcd.print(" AT ");
   int a = round(airtemp);
   lcd.print(a);
@@ -237,13 +237,13 @@ void Humidity_Check () {
   humidity = dht.readHumidity();
   if (isnan(humidity)) {
 
-      Serial.println(F(".Failed to read from DHT sensor!."));
+      Serial.println(F("...Failed to read from DHT sensor!..."));
       return;
 
   }
-  Serial.print(".Humidity in %: ");
+  Serial.print("...Humidity in %: ");
   Serial.print(humidity);
-  Serial.println(".");
+  Serial.println("...");
   lcd.print(" H ");
   int h = round(humidity);
   lcd.print(h);
@@ -261,7 +261,12 @@ void Datalog () {
     datalog.print(" Humidity: ");
     datalog.print(humidity);
     datalog.print("% FAN: ");
-    datalog.print(fanhigh);
+    if (fanhigh == true) {
+      datalog.print("ON");
+    }
+    else if (fanhigh == false) {
+      datalog.print("OFF");
+    }
     
     if (timer16h.isActive()) {
     
@@ -284,5 +289,6 @@ void Datalog () {
       datalog.println(" LEDs OK");
 
     }
+    datalog.close();
 
 }
