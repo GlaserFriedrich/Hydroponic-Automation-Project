@@ -90,7 +90,7 @@ void setup() {
   delay(1000);
   lcd.clear();
 
-  timer8h.restart();
+  timer16h.restart();
  
   timer2h.restart();
 }
@@ -155,7 +155,7 @@ void loop() {
     }
     
     Datalog();
-    
+
   }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (timer15min.onExpired()) {
