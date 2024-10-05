@@ -267,12 +267,18 @@ void Datalog () {
     else if (fanhigh == false) {
       datalog.print("OFF");
     }
-    
+
+    if ((LEDan == true) && (LDRvalue >= 500))  {    //LEDAN?
+
+      datalog.print(" LEDs OK");
+
+    }
+
     if (timer16h.isActive()) {
     
     datalog.print(" Day Cycle: ");
     datalog.print(timer16h.getPercentValue());
-    datalog.print("%");
+    datalog.println("%");
 
     }
 
@@ -280,15 +286,11 @@ void Datalog () {
     
     datalog.print(" Night Cycle: ");
     datalog.print(timer8h.getPercentValue());
-    datalog.print("%");
+    datalog.println("%");
 
     }
 
-    if ((LEDan == true) && (LDRvalue >= 500))  {    //LEDAN?
-
-      datalog.println(" LEDs OK");
-
-    }
+    
     datalog.close();
 
 }
